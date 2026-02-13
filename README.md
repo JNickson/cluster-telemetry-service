@@ -8,11 +8,13 @@ Run locally:
 
 `go run main.go`
 
-API: http://localhost:8001
+API: `http://localhost:8001`
+
+**Need to have a running kubernetes cluster**
 
 Endpoints
-• /healthz
-• /readyz
-• /api/v1/nodes
-• /api/v1/pods
-• /api/v1/pods/logs?namespace=<ns>&name=<pod>
+- /healthz
+- /readyz
+- /api/v1/nodes
+- /api/v1/pods
+- /api/v1/pods/logs?namespace=<ns>&name=<pod>
