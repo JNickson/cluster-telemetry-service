@@ -11,7 +11,6 @@ type Pod struct {
 	Age      string `json:"age"`
 
 	Containers []Container `json:"containers"`
-	Logs       string      `json:"logs,omitempty"`
 }
 
 type Container struct {

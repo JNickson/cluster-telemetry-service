@@ -7,32 +7,36 @@ import (
 	"github.com/JNickson/cluster-telemetry-service/internal/utils"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/apimachinery/pkg/labels"
+	corev1listers "k8s.io/client-go/listers/core/v1"
 	metricsclient "k8s.io/metrics/pkg/client/clientset/versioned"
 )
 
 type Service interface {
-	FetchNodes(ctx context.Context) ([]Node, error)
+	BuildSnapshot(ctx context.Context) ([]Node, error)
 }
+
 type NodeService struct {
-	kubeClient    *kubernetes.Clientset
+	nodeLister    corev1listers.NodeLister
+	podLister     corev1listers.PodLister
 	metricsClient *metricsclient.Clientset
 }
 
 func NewNodeService(
-	kubeClient *kubernetes.Clientset,
+	nodeLister corev1listers.NodeLister,
+	podLister corev1listers.PodLister,
 	metricsClient *metricsclient.Clientset,
 ) *NodeService {
 	return &NodeService{
-		kubeClient:    kubeClient,
+		nodeLister:    nodeLister,
+		podLister:     podLister,
 		metricsClient: metricsClient,
 	}
 }
 
-func (s *NodeService) FetchNodes(ctx context.Context) ([]Node, error) {
-	nodesList, err := s.kubeClient.CoreV1().
-		Nodes().
-		List(ctx, metav1.ListOptions{})
+func (s *NodeService) BuildSnapshot(ctx context.Context) ([]Node, error) {
+
+	nodesList, err := s.nodeLister.List(labels.Everything())
 	if err != nil {
 		return nil, fmt.Errorf("failed to list nodes: %w", err)
 	}
@@ -44,34 +48,50 @@ func (s *NodeService) FetchNodes(ctx context.Context) ([]Node, error) {
 		return nil, fmt.Errorf("failed to get node metrics: %w", err)
 	}
 
-	metricsByNode := map[string]v1.ResourceList{}
+	metricsByNode := make(map[string]v1.ResourceList)
 	for _, m := range metricsList.Items {
 		metricsByNode[m.Name] = m.Usage
 	}
 
-	nodes := make([]Node, 0, len(nodesList.Items))
-	for _, n := range nodesList.Items {
+	allPods, err := s.podLister.List(labels.Everything())
+	if err != nil {
+		return nil, fmt.Errorf("failed to list pods: %w", err)
+	}
 
-		workloads, err := s.workloadsForNode(ctx, n.Name)
-		if err != nil {
-			return nil, err
+	podsByNode := make(map[string][]*v1.Pod)
+	for _, p := range allPods {
+		if p.Spec.NodeName != "" {
+			podsByNode[p.Spec.NodeName] = append(
+				podsByNode[p.Spec.NodeName],
+				p,
+			)
 		}
+	}
 
-		nodes = append(nodes, mapNode(
+	out := make([]Node, 0, len(nodesList))
+
+	for _, n := range nodesList {
+
+		workloads := buildWorkloadsForNode(
+			podsByNode[n.Name],
+		)
+
+		out = append(out, mapNode(
 			n,
 			metricsByNode[n.Name],
 			workloads,
 		))
 	}
 
-	return nodes, nil
+	return out, nil
 }
 
 func mapNode(
-	n v1.Node,
+	n *v1.Node,
 	usage v1.ResourceList,
 	workloads NodeWorkloads,
 ) Node {
+
 	ready := false
 	conditions := make([]Condition, 0)
 
@@ -87,17 +107,11 @@ func mapNode(
 		})
 	}
 
-	taints := []string{}
-	for _, t := range n.Spec.Taints {
-		taints = append(taints, fmt.Sprintf("%s=%s:%s", t.Key, t.Value, t.Effect))
-	}
-
-	// --- REAL METRICS ---
-	cpuUsed := usage[v1.ResourceCPU]
-	memUsed := usage[v1.ResourceMemory]
-
 	cpuAlloc := n.Status.Allocatable[v1.ResourceCPU]
 	memAlloc := n.Status.Allocatable[v1.ResourceMemory]
+
+	cpuUsed := usage[v1.ResourceCPU]
+	memUsed := usage[v1.ResourceMemory]
 
 	return Node{
 		Name:  n.Name,
@@ -105,7 +119,7 @@ func mapNode(
 		Age:   utils.AgeSince(n.CreationTimestamp.Time),
 
 		Labels: n.Labels,
-		Taints: taints,
+		Taints: formatTaints(n.Spec.Taints),
 
 		CPU: Usage{
 			Used:  fmt.Sprintf("%dm", cpuUsed.MilliValue()),
@@ -121,27 +135,16 @@ func mapNode(
 	}
 }
 
-func (s *NodeService) workloadsForNode(
-	ctx context.Context,
-	nodeName string,
-) (NodeWorkloads, error) {
-
-	pods, err := s.kubeClient.CoreV1().
-		Pods("").
-		List(ctx, metav1.ListOptions{
-			FieldSelector: "spec.nodeName=" + nodeName,
-		})
-	if err != nil {
-		return NodeWorkloads{}, err
-	}
+func buildWorkloadsForNode(
+	pods []*v1.Pod,
+) NodeWorkloads {
 
 	deployments := map[string]Workload{}
 	statefulSets := map[string]Workload{}
 	system := map[string]struct{}{}
 
-	for _, pod := range pods.Items {
+	for _, pod := range pods {
 
-		// kube-system pods → System
 		if pod.Namespace == "kube-system" {
 			system[pod.Name] = struct{}{}
 			continue
@@ -181,5 +184,13 @@ func (s *NodeService) workloadsForNode(
 		Deployments:  utils.MapValuesToSlice(deployments),
 		StatefulSets: utils.MapValuesToSlice(statefulSets),
 		System:       utils.MapKeysToSlice(system),
-	}, nil
+	}
+}
+
+func formatTaints(taints []v1.Taint) []string {
+	out := make([]string, 0, len(taints))
+	for _, t := range taints {
+		out = append(out, fmt.Sprintf("%s=%s:%s", t.Key, t.Value, t.Effect))
+	}
+	return out
 }
