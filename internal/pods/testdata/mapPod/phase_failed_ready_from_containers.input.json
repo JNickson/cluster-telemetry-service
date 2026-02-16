@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "name": "pod-failed",
+    "namespace": "default"
+  },
+  "spec": {
+    "nodeName": "node-1"
+  },
+  "status": {
+    "phase": "Failed",
+    "containerStatuses": [
+      {
+        "name": "c1",
+        "ready": true,
+        "restartCount": 0
+      }
+    ]
+  }
+}

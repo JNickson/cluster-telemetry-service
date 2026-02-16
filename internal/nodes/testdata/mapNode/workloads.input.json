@@ -1,0 +1,24 @@
+{
+  "node": {
+    "metadata": {
+      "name": "node-with-workloads",
+      "creationTimestamp": "2024-01-01T00:00:00Z"
+    },
+    "status": {
+      "allocatable": {
+        "cpu": "2000m",
+        "memory": "4Gi"
+      },
+      "conditions": [{ "type": "Ready", "status": "True" }]
+    }
+  },
+  "usage": {
+    "cpu": "500m",
+    "memory": "1Gi"
+  },
+  "workloads": {
+    "deployments": [{ "namespace": "default", "name": "api", "pods": 2 }],
+    "statefulSets": [{ "namespace": "default", "name": "db", "pods": 1 }],
+    "system": ["kube-proxy"]
+  }
+}

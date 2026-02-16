@@ -1,0 +1,30 @@
+{
+  "name": "node-ready",
+  "ready": true,
+  "age": "777d 15h",
+  "labels": {
+    "role": "worker"
+  },
+  "taints": [],
+  "cpu": {
+    "used": "500m",
+    "total": "2000m"
+  },
+  "memory": {
+    "used": "1024Mi",
+    "total": "4096Mi"
+  },
+  "conditions": [
+    {
+      "type": "Ready",
+      "status": "True",
+      "reason": "",
+      "message": ""
+    }
+  ],
+  "workloads": {
+    "deployments": [],
+    "statefulSets": [],
+    "system": []
+  }
+}

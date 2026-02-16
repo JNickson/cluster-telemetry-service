@@ -8,8 +8,8 @@ type Usage struct {
 type Condition struct {
 	Type    string `json:"type"`
 	Status  string `json:"status"`
-	Reason  string `json:"reason,omitempty"`
-	Message string `json:"message,omitempty"`
+	Reason  string `json:"reason"`
+	Message string `json:"message"`
 }
 
 type Node struct {
@@ -17,8 +17,8 @@ type Node struct {
 	Ready bool   `json:"ready"`
 	Age   string `json:"age"`
 
-	Labels map[string]string `json:"labels,omitempty"`
-	Taints []string          `json:"taints,omitempty"`
+	Labels map[string]string `json:"labels"`
+	Taints []string          `json:"taints"`
 
 	CPU    Usage `json:"cpu"`
 	Memory Usage `json:"memory"`
@@ -29,9 +29,9 @@ type Node struct {
 }
 
 type NodeWorkloads struct {
-	Deployments  []Workload `json:"deployments,omitempty"`
-	StatefulSets []Workload `json:"statefulSets,omitempty"`
-	System       []string   `json:"system,omitempty"`
+	Deployments  []Workload `json:"deployments"`
+	StatefulSets []Workload `json:"statefulSets"`
+	System       []string   `json:"system"`
 }
 
 type Workload struct {

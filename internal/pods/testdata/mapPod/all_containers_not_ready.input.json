@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "name": "pod-all-not-ready",
+    "namespace": "default"
+  },
+  "spec": {
+    "nodeName": "node-1"
+  },
+  "status": {
+    "phase": "Running",
+    "containerStatuses": [
+      {
+        "name": "c1",
+        "ready": false,
+        "restartCount": 1
+      },
+      {
+        "name": "c2",
+        "ready": false,
+        "restartCount": 2
+      }
+    ]
+  }
+}

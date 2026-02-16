@@ -1,0 +1,12 @@
+{
+  "metadata": {
+    "name": "pod-no-containers",
+    "namespace": "default"
+  },
+  "spec": {
+    "nodeName": "node-1"
+  },
+  "status": {
+    "phase": "Running"
+  }
+}

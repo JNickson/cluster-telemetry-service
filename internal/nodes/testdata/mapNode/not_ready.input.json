@@ -1,0 +1,24 @@
+{
+  "node": {
+    "metadata": {
+      "name": "node-not-ready",
+      "creationTimestamp": "2024-01-01T00:00:00Z"
+    },
+    "status": {
+      "allocatable": {
+        "cpu": "2000m",
+        "memory": "4Gi"
+      },
+      "conditions": [{ "type": "Ready", "status": "False" }]
+    }
+  },
+  "usage": {
+    "cpu": "0",
+    "memory": "0"
+  },
+  "workloads": {
+    "deployments": [],
+    "statefulSets": [],
+    "system": []
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "name": "pod-mixed-resources",
+    "namespace": "default"
+  },
+  "spec": {
+    "containers": [
+      {
+        "name": "c1",
+        "resources": {
+          "requests": {
+            "cpu": "100m",
+            "memory": "128Mi"
+          }
+        }
+      },
+      {
+        "name": "c2",
+        "resources": {
+          "requests": {
+            "memory": "512Mi"
+          }
+        }
+      }
+    ],
+    "nodeName": "node-1"
+  },
+  "status": {
+    "phase": "Running",
+    "containerStatuses": [
+      {
+        "name": "c1",
+        "ready": true,
+        "restartCount": 1
+      },
+      {
+        "name": "c2",
+        "ready": true,
+        "restartCount": 1
+      }
+    ]
+  }
+}

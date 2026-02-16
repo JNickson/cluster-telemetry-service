@@ -1,0 +1,23 @@
+{
+  "name": "pod-mixed-resources",
+  "namespace": "default",
+  "node": "node-1",
+  "phase": "Running",
+  "ready": true,
+  "restarts": 2,
+  "age": "106751d 23h",
+  "containers": [
+    {
+      "name": "c1",
+      "ready": true,
+      "cpuRequest": "100m",
+      "memoryRequest": "128Mi"
+    },
+    {
+      "name": "c2",
+      "ready": true,
+      "cpuRequest": "",
+      "memoryRequest": "512Mi"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "pod-memory-only",
+  "namespace": "default",
+  "node": "node-1",
+  "phase": "Running",
+  "ready": true,
+  "restarts": 0,
+  "age": "106751d 23h",
+  "containers": [
+    {
+      "name": "c1",
+      "ready": true,
+      "cpuRequest": "",
+      "memoryRequest": "256Mi"
+    }
+  ]
+}

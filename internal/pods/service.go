@@ -59,10 +59,32 @@ func mapPod(p v1.Pod) Pod {
 		ready = false
 	}
 
+	// Build lookup from spec containers
+	specMap := make(map[string]v1.Container)
+	for _, c := range p.Spec.Containers {
+		specMap[c.Name] = c
+	}
+
 	for _, cs := range p.Status.ContainerStatuses {
+
+		specContainer := specMap[cs.Name]
+
+		var cpuReq, memReq string
+
+		if req := specContainer.Resources.Requests; req != nil {
+			if cpu, ok := req[v1.ResourceCPU]; ok {
+				cpuReq = cpu.String()
+			}
+			if mem, ok := req[v1.ResourceMemory]; ok {
+				memReq = mem.String()
+			}
+		}
+
 		containers = append(containers, Container{
-			Name:  cs.Name,
-			Ready: cs.Ready,
+			Name:          cs.Name,
+			Ready:         cs.Ready,
+			CPURequest:    cpuReq,
+			MemoryRequest: memReq,
 		})
 
 		restarts += cs.RestartCount

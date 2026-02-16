@@ -1,0 +1,23 @@
+{
+  "name": "node-tainted",
+  "ready": false,
+  "age": "777d 15h",
+  "labels": null,
+  "taints": [
+    "dedicated=gpu:NoSchedule"
+  ],
+  "cpu": {
+    "used": "100m",
+    "total": "1000m"
+  },
+  "memory": {
+    "used": "512Mi",
+    "total": "2048Mi"
+  },
+  "conditions": [],
+  "workloads": {
+    "deployments": [],
+    "statefulSets": [],
+    "system": []
+  }
+}

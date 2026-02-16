@@ -1,0 +1,26 @@
+{
+  "node": {
+    "metadata": {
+      "name": "node-tainted",
+      "creationTimestamp": "2024-01-01T00:00:00Z"
+    },
+    "spec": {
+      "taints": [{ "key": "dedicated", "value": "gpu", "effect": "NoSchedule" }]
+    },
+    "status": {
+      "allocatable": {
+        "cpu": "1000m",
+        "memory": "2Gi"
+      }
+    }
+  },
+  "usage": {
+    "cpu": "100m",
+    "memory": "512Mi"
+  },
+  "workloads": {
+    "deployments": [],
+    "statefulSets": [],
+    "system": []
+  }
+}
