@@ -21,7 +21,6 @@ func RunGoldenTest[In any, Out any](
 	dir string,
 	exec func(input In) Out,
 ) {
-	flag.Parse()
 
 	inputFiles, err := filepath.Glob(filepath.Join(dir, "*.input.json"))
 	require.NoError(t, err)
@@ -61,7 +60,12 @@ func RunGoldenTest[In any, Out any](
 			readJSON(t, goldenPath, &expected)
 
 			if diff := cmp.Diff(expected, result); diff != "" {
-				t.Fatalf("mismatch (-expected +actual):\n%s", diff)
+				t.Fatalf(
+					"mismatch (-expected +actual):\n%s\n\n"+
+						"If this change is intentional, run:\n"+
+						" go test ./... -args -update\n",
+					diff,
+				)
 			}
 		})
 	}
