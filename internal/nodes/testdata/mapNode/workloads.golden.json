@@ -1,7 +1,7 @@
 {
   "name": "node-with-workloads",
   "ready": true,
-  "age": "777d 15h",
+  "age": "731d 0h",
   "labels": null,
   "taints": [],
   "cpu": {
