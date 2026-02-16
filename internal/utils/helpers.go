@@ -8,8 +8,14 @@ import (
 	"time"
 )
 
+var Now = time.Now
+
 func AgeSince(t time.Time) string {
-	d := time.Since(t)
+	return AgeSinceWithNow(t, Now())
+}
+
+func AgeSinceWithNow(t, now time.Time) string {
+	d := now.Sub(t)
 
 	days := int(d.Hours()) / 24
 	hours := int(d.Hours()) % 24

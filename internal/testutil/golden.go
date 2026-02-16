@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/JNickson/cluster-telemetry-service/internal/utils"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
 )
@@ -32,6 +34,13 @@ func RunGoldenTest[In any, Out any](
 		name := filepath.Base(inputPath)
 
 		t.Run(name, func(t *testing.T) {
+
+			originalNow := utils.Now
+			utils.Now = func() time.Time {
+				return time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+			}
+			defer func() { utils.Now = originalNow }()
+
 			var input In
 			readJSON(t, inputPath, &input)
 

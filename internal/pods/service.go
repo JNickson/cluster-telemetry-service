@@ -2,6 +2,7 @@ package pods
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/JNickson/cluster-telemetry-service/internal/utils"
 	v1 "k8s.io/api/core/v1"
@@ -73,10 +74,10 @@ func mapPod(p v1.Pod) Pod {
 
 		if req := specContainer.Resources.Requests; req != nil {
 			if cpu, ok := req[v1.ResourceCPU]; ok {
-				cpuReq = cpu.String()
+				cpuReq = fmt.Sprintf("%dm", cpu.MilliValue())
 			}
 			if mem, ok := req[v1.ResourceMemory]; ok {
-				memReq = mem.String()
+				memReq = fmt.Sprintf("%dMi", mem.Value()/(1024*1024))
 			}
 		}
 

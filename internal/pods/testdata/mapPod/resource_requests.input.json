@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "name": "pod-memory-only",
+    "name": "pod-1",
     "namespace": "default"
   },
   "spec": {
@@ -9,7 +9,8 @@
         "name": "c1",
         "resources": {
           "requests": {
-            "memory": "256Mi"
+            "cpu": "100m",
+            "memory": "134217728"
           }
         }
       }
@@ -22,7 +23,7 @@
       {
         "name": "c1",
         "ready": true,
-        "restartCount": 0
+        "restartCount": 1
       }
     ]
   }
