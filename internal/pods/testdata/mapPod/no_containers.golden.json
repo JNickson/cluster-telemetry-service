@@ -1,0 +1,10 @@
+{
+  "name": "pod-no-containers",
+  "namespace": "default",
+  "node": "node-1",
+  "phase": "Running",
+  "ready": false,
+  "restarts": 0,
+  "age": "106751d 23h",
+  "containers": null
+}

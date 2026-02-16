@@ -16,4 +16,7 @@ type Pod struct {
 type Container struct {
 	Name  string `json:"name"`
 	Ready bool   `json:"ready"`
+
+	CPURequest    string `json:"cpuRequest"`
+	MemoryRequest string `json:"memoryRequest"`
 }

@@ -1,0 +1,27 @@
+{
+  "node": {
+    "metadata": {
+      "name": "node-conditions",
+      "creationTimestamp": "2024-01-01T00:00:00Z"
+    },
+    "status": {
+      "allocatable": {
+        "cpu": "2000m",
+        "memory": "4Gi"
+      },
+      "conditions": [
+        { "type": "Ready", "status": "True" },
+        { "type": "MemoryPressure", "status": "False" }
+      ]
+    }
+  },
+  "usage": {
+    "cpu": "250m",
+    "memory": "2Gi"
+  },
+  "workloads": {
+    "deployments": [],
+    "statefulSets": [],
+    "system": []
+  }
+}

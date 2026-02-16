@@ -1,0 +1,21 @@
+{
+  "name": "node-no-usage",
+  "ready": false,
+  "age": "777d 15h",
+  "labels": null,
+  "taints": [],
+  "cpu": {
+    "used": "0m",
+    "total": "2000m"
+  },
+  "memory": {
+    "used": "0Mi",
+    "total": "4096Mi"
+  },
+  "conditions": [],
+  "workloads": {
+    "deployments": [],
+    "statefulSets": [],
+    "system": []
+  }
+}

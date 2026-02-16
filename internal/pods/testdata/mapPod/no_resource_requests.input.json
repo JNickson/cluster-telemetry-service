@@ -1,0 +1,25 @@
+{
+  "metadata": {
+    "name": "pod-no-resources",
+    "namespace": "default"
+  },
+  "spec": {
+    "containers": [
+      {
+        "name": "c1",
+        "resources": {}
+      }
+    ],
+    "nodeName": "node-1"
+  },
+  "status": {
+    "phase": "Running",
+    "containerStatuses": [
+      {
+        "name": "c1",
+        "ready": true,
+        "restartCount": 0
+      }
+    ]
+  }
+}

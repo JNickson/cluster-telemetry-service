@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "name": "pod-zero-restarts",
+    "namespace": "default"
+  },
+  "spec": {
+    "nodeName": "node-1"
+  },
+  "status": {
+    "phase": "Running",
+    "containerStatuses": [
+      {
+        "name": "c1",
+        "ready": true,
+        "restartCount": 0
+      },
+      {
+        "name": "c2",
+        "ready": true,
+        "restartCount": 0
+      }
+    ]
+  }
+}

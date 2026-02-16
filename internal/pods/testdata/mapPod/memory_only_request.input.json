@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "name": "pod-memory-only",
+    "namespace": "default"
+  },
+  "spec": {
+    "containers": [
+      {
+        "name": "c1",
+        "resources": {
+          "requests": {
+            "memory": "256Mi"
+          }
+        }
+      }
+    ],
+    "nodeName": "node-1"
+  },
+  "status": {
+    "phase": "Running",
+    "containerStatuses": [
+      {
+        "name": "c1",
+        "ready": true,
+        "restartCount": 0
+      }
+    ]
+  }
+}

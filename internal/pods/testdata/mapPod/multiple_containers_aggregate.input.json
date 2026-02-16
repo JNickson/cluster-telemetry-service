@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "name": "pod-multi",
+    "namespace": "default"
+  },
+  "spec": {
+    "nodeName": "node-1"
+  },
+  "status": {
+    "phase": "Running",
+    "containerStatuses": [
+      {
+        "name": "c1",
+        "ready": true,
+        "restartCount": 1
+      },
+      {
+        "name": "c2",
+        "ready": false,
+        "restartCount": 2
+      }
+    ]
+  }
+}

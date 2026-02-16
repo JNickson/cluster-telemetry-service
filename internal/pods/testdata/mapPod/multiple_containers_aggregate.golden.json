@@ -1,0 +1,23 @@
+{
+  "name": "pod-multi",
+  "namespace": "default",
+  "node": "node-1",
+  "phase": "Running",
+  "ready": false,
+  "restarts": 3,
+  "age": "106751d 23h",
+  "containers": [
+    {
+      "name": "c1",
+      "ready": true,
+      "cpuRequest": "",
+      "memoryRequest": ""
+    },
+    {
+      "name": "c2",
+      "ready": false,
+      "cpuRequest": "",
+      "memoryRequest": ""
+    }
+  ]
+}
