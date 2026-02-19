@@ -11,11 +11,11 @@ Run locally:
 runs on: `http://localhost:8001`
 
 Endpoints:
-  - /healthz
-  - /readyz
-  - /api/v1/nodes (cached / informers, 30 second intervals)
-  - /api/v1/pods (cached / informers, 30 second intervals)
-  - /api/v1/pods/logs/stream?namespace=<ns> (streamed)
+  - `/healthz`
+  - `/readyz`
+  - `/api/v1/nodes` (cached / informers, 30 second intervals)
+  - `/api/v1/pods` (cached / informers, 30 second intervals)
+  - `/api/v1/pods/logs/stream?namespace=<ns>` (streamed)
 
 Stream query options:
   - format: json (default) or text, example: `http://localhost:8001/api/v1/pods/logs/stream?namespace=default&format=text`
