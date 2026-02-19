@@ -6,26 +6,22 @@ Watches Nodes and Pods, builds 30s snapshots from the informer cache, and expose
 
 Run locally:
 
-`go run main.go`
-
-or:
-
 `make dev`
 
-API: http://localhost:8001
+runs on: `http://localhost:8001`
 
 Endpoints:
   - /healthz
   - /readyz
-  - /api/v1/nodes
-  - /api/v1/pods
-  - /api/v1/pods/logs/stream?namespace=<ns>
+  - /api/v1/nodes (cached / informers, 30 second intervals)
+  - /api/v1/pods (cached / informers, 30 second intervals)
+  - /api/v1/pods/logs/stream?namespace=<ns> (streamed)
 
 Stream query options:
-  - format: json (default) or text
-  - frequencyMs: emit interval in milliseconds (default 500, min 100, max 10000)
-  - fromStart: true/false (default false)
-  - tailLines: when fromStart=true, limit initial historical lines
+  - format: json (default) or text, example: `http://localhost:8001/api/v1/pods/logs/stream?namespace=default&format=text`
+  - frequencyMs: emit interval in milliseconds (default 500, min 100, max 10000), example: `http://localhost:8001/api/v1/pods/logs/stream?namespace=default&frequencyMs=250`
+  - fromStart: true/false (default false), example: `http://localhost:8001/api/v1/pods/logs/stream?namespace=default&fromStart=true`
+  - tailLines: when fromStart=true, limit initial historical lines, example: `http://localhost:8001/api/v1/pods/logs/stream?namespace=default&fromStart=true&tailLines=100`
 
 Behavior:
   - stream is always namespace-scoped (all pods in the namespace)
@@ -54,10 +50,11 @@ Run the full suite with make:
 - `make bench`
 - `make profile`
 - `make perf`
+- `make ci`
 
 ## GitHub Actions
 
-- `CI` workflow runs on PRs and `main`: formatting, `go vet`, `govulncheck`, `golangci-lint`, typecheck, build, Docker build check, and tests.
+- `CI` workflow runs on PRs and `main`: formatting, govulncheck, golangci-lint, build, Docker build check, and tests.
 - `Release` workflow runs on `v*.*.*` tags and pushes Docker images to GHCR.
 - Dependabot is enabled for Go modules and GitHub Actions updates.
 
