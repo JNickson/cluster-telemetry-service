@@ -18,13 +18,11 @@ import (
 )
 
 type App struct {
-	store            *store.Store
-	manager          *informers.Manager
-	nodesService     nodes.Service
-	podsService      pods.Service
-	podLogsService   *pods.LogsService
-	podLogsCollector *pods.PodLogsCollector
-	server           *http.Server
+	store        *store.Store
+	manager      *informers.Manager
+	nodesService nodes.Service
+	podsService  pods.Service
+	server       *http.Server
 }
 
 func New(cfg *rest.Config) (*App, error) {
@@ -46,40 +44,20 @@ func New(cfg *rest.Config) (*App, error) {
 	podLister := factory.Core().V1().Pods().Lister()
 
 	nodeService := nodes.NewNodeService(nodeLister, podLister, metricsClient)
-	podsService := pods.NewPodService(podLister)
-	podLogsService := pods.NewLogsService(kubeClient)
-
-	// TODO: Implement real db writer
-	var dbWriter pods.DBWriter = nil
-	var podLogsCollector *pods.PodLogsCollector
-
-	if dbWriter != nil {
-		podLogsCollector = pods.NewPodLogsCollector(
-			podLister,
-			kubeClient,
-			dbWriter,
-		)
-	}
+	podsService := pods.NewPodService(podLister, kubeClient)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8001"
 	}
 
-	app := &App{
-		store:            st,
-		manager:          manager,
-		nodesService:     nodeService,
-		podsService:      podsService,
-		podLogsService:   podLogsService,
-		podLogsCollector: podLogsCollector,
-	}
+	app := &App{store: st, manager: manager, nodesService: nodeService, podsService: podsService}
 
 	server := &http.Server{
 		Addr:              ":" + port,
 		Handler:           app.setupRouter(),
 		ReadTimeout:       10 * time.Second,
-		WriteTimeout:      10 * time.Second,
+		WriteTimeout:      0,
 		IdleTimeout:       60 * time.Second,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
@@ -98,10 +76,6 @@ func (a *App) Start(ctx context.Context) {
 	go a.startNodeReconciler(ctx)
 	go a.startPodReconciler(ctx)
 
-	if a.podLogsCollector != nil {
-		go a.podLogsCollector.Start(ctx)
-	}
-
 	go func() {
 		slog.Info("starting server", "addr", a.server.Addr)
 		if err := a.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -117,6 +91,7 @@ func (a *App) Start(ctx context.Context) {
 	defer cancel()
 
 	_ = a.server.Shutdown(shutdownCtx)
+
 }
 
 func (a *App) setupRouter() http.Handler {
@@ -130,23 +105,78 @@ func (a *App) setupRouter() http.Handler {
 		utils.WriteJSON(w, http.StatusOK, a.store.ListPods())
 	})
 
-	api.HandleFunc("/pods/logs", func(w http.ResponseWriter, r *http.Request) {
+	api.HandleFunc("/pods/logs/stream", func(w http.ResponseWriter, r *http.Request) {
 		namespace := r.URL.Query().Get("namespace")
-		name := r.URL.Query().Get("name")
 
-		if namespace == "" || name == "" {
-			http.Error(w, "namespace and name required", http.StatusBadRequest)
+		if namespace == "" {
+			http.Error(w, "namespace required", http.StatusBadRequest)
 			return
 		}
 
-		logs, err := a.podLogsService.GetLogs(r.Context(), namespace, name, 300)
+		if r.URL.Query().Get("name") != "" {
+			http.Error(w, "name is not supported; stream is namespace-scoped", http.StatusBadRequest)
+			return
+		}
+
+		opts, err := podLogsStreamOptionsFromQuery(r)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte(logs))
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			http.Error(w, "streaming not supported", http.StatusInternalServerError)
+			return
+		}
+
+		if opts.Format == podLogsStreamFormatJSON {
+			w.Header().Set("Content-Type", "application/x-ndjson; charset=utf-8")
+		} else {
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		}
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "keep-alive")
+		w.Header().Set("X-Accel-Buffering", "no")
+		w.WriteHeader(http.StatusOK)
+		flusher.Flush()
+
+		lastSentAt := time.Time{}
+
+		streamOpts := pods.LogStreamOptions{
+			FromStart: opts.FromStart,
+			TailLines: opts.TailLines,
+		}
+
+		handleRecord := func(record pods.LogStreamRecord) error {
+			if !lastSentAt.IsZero() {
+				wait := opts.Frequency - time.Since(lastSentAt)
+				if wait > 0 {
+					timer := time.NewTimer(wait)
+					defer timer.Stop()
+
+					select {
+					case <-r.Context().Done():
+						return r.Context().Err()
+					case <-timer.C:
+					}
+				}
+			}
+
+			if err := writePodLogStreamRecord(w, record, opts.Format); err != nil {
+				return err
+			}
+
+			lastSentAt = time.Now()
+			flusher.Flush()
+			return nil
+		}
+
+		err = a.podsService.StreamNamespaceLogs(r.Context(), namespace, streamOpts, handleRecord)
+
+		if err != nil && r.Context().Err() == nil {
+			slog.Warn("pod logs stream ended with error", "namespace", namespace, "error", err)
+		}
 	})
 
 	mux := http.NewServeMux()
