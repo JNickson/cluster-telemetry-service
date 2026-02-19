@@ -1,5 +1,7 @@
 package pods
 
+import "time"
+
 type Pod struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
@@ -19,4 +21,11 @@ type Container struct {
 
 	CPURequest    string `json:"cpuRequest"`
 	MemoryRequest string `json:"memoryRequest"`
+}
+
+type LogStreamRecord struct {
+	Namespace string    `json:"namespace"`
+	Pod       string    `json:"pod"`
+	Message   string    `json:"message"`
+	Timestamp time.Time `json:"timestamp"`
 }
