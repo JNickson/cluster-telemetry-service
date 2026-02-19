@@ -60,7 +60,7 @@ func buildBenchmarkLogPayload(lines int) string {
 	var sb strings.Builder
 	for i := 0; i < lines; i++ {
 		sb.WriteString("2026-02-19T12:00:00Z benchmark-line-")
-		sb.WriteString(fmt.Sprintf("%d", i))
+		fmt.Fprintf(&sb, "%d", i)
 		sb.WriteByte('\n')
 	}
 
